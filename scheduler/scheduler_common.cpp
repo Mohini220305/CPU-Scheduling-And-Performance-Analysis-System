@@ -155,9 +155,9 @@ bool runScheduler(const std::string& algorithm, const std::vector<Process>& proc
     try {
         if (algorithm == "FCFS") {
             out = runFCFS(processes);
-        } /*else if (algorithm == "SJF") {
+        } else if (algorithm == "SJF") {
             out = runSJF(processes);
-        } else if (algorithm == "SRTF") {
+        } /*else if (algorithm == "SRTF") {
             out = runSRTF(processes);
         } else if (algorithm == "RR") {
             if (timeQuantum <= 0) {

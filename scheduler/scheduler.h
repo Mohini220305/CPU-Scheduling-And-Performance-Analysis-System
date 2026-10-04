@@ -8,7 +8,7 @@
 
 // ---------------- the five algorithms ----------------
 SchedulingResult runFCFS(const std::vector<Process> &input);                       
-//SchedulingResult runSJF(const std::vector<Process> &input);                         
+SchedulingResult runSJF(const std::vector<Process> &input);                         
 //SchedulingResult runSRTF(const std::vector<Process> &input);                        
 //SchedulingResult runRoundRobin(const std::vector<Process> &input, int timeQuantum); 
 //SchedulingResult runPriority(const std::vector<Process> &input);                    
