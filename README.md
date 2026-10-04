@@ -111,12 +111,12 @@ CPU-Scheduling-And-Performance-Analysis-System/
 │
 ├── README.md
 │
+├── scheduler/
 ├── database/
-│
-├── src/
-│   ├── scheduling/
-│   ├── database/
-│   └── workload/
+├── backend/
+│   ├── models/
+├── frontend/   
+├── build/  
 │
 ├── tests/
 │
