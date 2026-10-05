@@ -18,7 +18,7 @@ bool validateProcesses(const std::vector<Process>& processes, std::string& error
         error = "A workload can contain at most " + std::to_string(SCHED_MAX_PROCESSES) + " processes.";
         return false;
     }
-    std::set<std::string> seen;  // upper-case ids, because MySQL compares ids case-insensitively
+    std::set<std::string> seen; 
     for (size_t i = 0; i < processes.size(); i++) {
         const Process& p = processes[i];
         if (p.pid.empty()) {
@@ -144,7 +144,7 @@ bool runScheduler(const std::string& algorithm, const std::vector<Process>& proc
             out = runSJF(processes);
         } else if (algorithm == "SRTF") {
             out = runSRTF(processes);
-        } /*else if (algorithm == "RR") {
+        } else if (algorithm == "RR") {
             if (timeQuantum <= 0) {
                 error = "Time quantum must be greater than 0 for Round Robin.";
                 return false;
@@ -156,7 +156,7 @@ bool runScheduler(const std::string& algorithm, const std::vector<Process>& proc
             out = runRoundRobin(processes, timeQuantum);
         } else if (algorithm == "PRIORITY") {
             out = runPriority(processes);
-        } */else {
+        } else {
             error = "Unknown scheduling algorithm '" + algorithm + "'.";
             return false;
         }

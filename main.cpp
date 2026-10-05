@@ -15,7 +15,7 @@ int main()
         {"P4", 3, 6, 2}};
 
 
-    SchedulingResult result = runSRTF(processes);
+    SchedulingResult result = runRoundRobin(processes, 2);
 
     cout << "\n========== FCFS CPU SCHEDULING ==========\n\n";
 
