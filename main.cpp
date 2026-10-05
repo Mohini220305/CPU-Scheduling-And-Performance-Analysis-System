@@ -14,8 +14,8 @@ int main()
         {"P3", 2, 8, 4},
         {"P4", 3, 6, 2}};
 
-    // Run FCFS
-    SchedulingResult result = runFCFS(processes);
+
+    SchedulingResult result = runSRTF(processes);
 
     cout << "\n========== FCFS CPU SCHEDULING ==========\n\n";
 

@@ -11,7 +11,6 @@ SchedulingResult runFCFS(const std::vector<Process>& input) {
     std::vector<Process>& p = result.processes;
     int n = (int)p.size();
 
-    // Execution order = arrival time; equal arrival -> the order they were entered (stable sort)
     std::vector<int> order(n);
     std::iota(order.begin(), order.end(), 0);
     std::stable_sort(order.begin(), order.end(),
@@ -20,7 +19,7 @@ SchedulingResult runFCFS(const std::vector<Process>& input) {
     int time = 0;
     for (int k = 0; k < n; k++) {
         Process& cur = p[order[k]];
-        if (time < cur.arrivalTime) {                       // CPU idle until the process arrives
+        if (time < cur.arrivalTime) {                       
             addSegment(result.gantt, IDLE_PID, time, cur.arrivalTime);
             time = cur.arrivalTime;
         }

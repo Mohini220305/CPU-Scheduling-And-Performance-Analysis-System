@@ -4,9 +4,6 @@
 #include <exception>
 #include <set>
 
-// ---------------------------------------------------------------
-// Validation
-// ---------------------------------------------------------------
 static std::string toUpper(std::string s) {
     for (size_t i = 0; i < s.size(); i++) s[i] = (char)std::toupper((unsigned char)s[i]);
     return s;
@@ -74,9 +71,6 @@ bool validateProcesses(const std::vector<Process>& processes, std::string& error
     return true;
 }
 
-// ---------------------------------------------------------------
-// Gantt chart helper
-// ---------------------------------------------------------------
 void addSegment(std::vector<GanttSegment>& gantt, const std::string& pid, int start, int end) {
     if (end <= start) return;  // empty block
     if (!gantt.empty() && gantt.back().processId == pid && gantt.back().endTime == start) {
@@ -101,9 +95,6 @@ void prepareProcesses(std::vector<Process>& processes) {
     }
 }
 
-// ---------------------------------------------------------------
-// Metrics
-// ---------------------------------------------------------------
 void finalizeResult(SchedulingResult& r) {
     double sumWT = 0, sumTAT = 0, sumRT = 0;
     int lastCompletion = 0;
@@ -119,14 +110,11 @@ void finalizeResult(SchedulingResult& r) {
         if (p.completionTime > lastCompletion) lastCompletion = p.completionTime;
     }
 
-    // busy time = total length of the non-idle Gantt blocks
     int busy = 0;
     for (size_t i = 0; i < r.gantt.size(); i++) {
         if (r.gantt[i].processId != IDLE_PID) busy += r.gantt[i].endTime - r.gantt[i].startTime;
     }
 
-    // Context switches: the CPU is given to a process that is different from the
-    // process that ran last. Idle time is skipped; the first dispatch is not counted.
     int switches = 0;
     std::string lastPid = "";
     for (size_t i = 0; i < r.gantt.size(); i++) {
@@ -146,9 +134,6 @@ void finalizeResult(SchedulingResult& r) {
     r.contextSwitches = switches;
 }
 
-// ---------------------------------------------------------------
-// Dispatcher
-// ---------------------------------------------------------------
 bool runScheduler(const std::string& algorithm, const std::vector<Process>& processes,
                   int timeQuantum, SchedulingResult& out, std::string& error) {
     if (!validateProcesses(processes, error)) return false;
@@ -157,9 +142,9 @@ bool runScheduler(const std::string& algorithm, const std::vector<Process>& proc
             out = runFCFS(processes);
         } else if (algorithm == "SJF") {
             out = runSJF(processes);
-        } /*else if (algorithm == "SRTF") {
+        } else if (algorithm == "SRTF") {
             out = runSRTF(processes);
-        } else if (algorithm == "RR") {
+        } /*else if (algorithm == "RR") {
             if (timeQuantum <= 0) {
                 error = "Time quantum must be greater than 0 for Round Robin.";
                 return false;
