@@ -8,11 +8,15 @@
 #pragma comment(lib, "ws2_32.lib")
 
 #include "scheduler/scheduler.h"
+#include "backend/database.h"
+#include "backend/config.h"
 
 using namespace std;
 
 const int PORT = 8080;
 const int BUFFER_SIZE = 8192;
+Database *db = nullptr;
+bool databaseConnected = false;
 
 // ---------- File ----------
 string readFile(const string &fileName)
@@ -173,6 +177,7 @@ string resultJson(const SchedulingResult &r)
 }
 
 // ---------- Simulation ----------
+// ---------- Simulation ----------
 void handleSimulation(SOCKET socket, const string &body)
 {
     string algorithm = getJsonString(body, "algorithm");
@@ -185,7 +190,6 @@ void handleSimulation(SOCKET socket, const string &body)
     }
 
     int quantum = getJsonInt(body, "timeQuantum");
-
     vector<string> objects = getProcessObjects(body);
 
     if (objects.empty())
@@ -204,9 +208,11 @@ void handleSimulation(SOCKET socket, const string &body)
         p.arrivalTime = getJsonInt(obj, "arrivalTime");
         p.burstTime = getJsonInt(obj, "burstTime");
         p.priority = getJsonInt(obj, "priority", 1);
+
         processes.push_back(p);
     }
 
+    // Step 1: Run the scheduling algorithm
     SchedulingResult result;
     string error;
 
@@ -217,8 +223,61 @@ void handleSimulation(SOCKET socket, const string &body)
         return;
     }
 
-    sendResponse(socket, "200 OK", "application/json",
-                 resultJson(result));
+    // Step 2: Check database connection
+    if (db == nullptr || !databaseConnected)
+    {
+        sendResponse(
+            socket,
+            "500 Internal Server Error",
+            "application/json",
+            "{\"ok\":false,\"error\":\"Database is not connected. Results were not saved.\"}");
+        return;
+    }
+
+    // Step 3: Save workload and processes
+    long long workloadId = 0;
+
+    string workloadName = algorithm + " Workload";
+    string description = "Workload submitted through the frontend";
+
+    if (!db->saveWorkload(
+            workloadName,
+            description,
+            processes,
+            workloadId,
+            error))
+    {
+        sendResponse(
+            socket,
+            "500 Internal Server Error",
+            "application/json",
+            "{\"ok\":false,\"error\":\"Failed to save workload: " +
+                error + "\"}");
+        return;
+    }
+
+    // Step 4: Save scheduling run, process results, and Gantt segments
+    long long runId = 0;
+
+    if (!db->saveRun(workloadId, result, runId, error))
+    {
+        sendResponse(
+            socket,
+            "500 Internal Server Error",
+            "application/json",
+            "{\"ok\":false,\"error\":\"Failed to save scheduling results: " +
+                error + "\"}");
+        return;
+    }
+
+    // Step 5: Return results to frontend
+    string response = resultJson(result);
+
+    sendResponse(socket, "200 OK", "application/json", response);
+
+    cout << "Saved " << algorithm
+         << " scheduling run. Workload ID: " << workloadId
+         << ", Run ID: " << runId << endl;
 }
 
 // ---------- Request Handler ----------
@@ -276,16 +335,16 @@ void handleRequest(SOCKET socket)
     // Status
     if (request.find("GET /api/status") == 0)
     {
-        sendResponse(
-            socket,
-            "200 OK",
-            "application/json",
+        string statusJson =
             "{\"project\":\"CPU Scheduling and Performance Analysis System\","
             "\"backend\":\"C++17\","
             "\"database\":\"MySQL 8.0\","
-            "\"databaseConnected\":false,"
-            "\"algorithmsImplemented\":5,"
-            "\"status\":\"Backend connected successfully\"}");
+            "\"databaseConnected\":" +
+            string(databaseConnected ? "true" : "false") +
+            ",\"algorithmsImplemented\":5,"
+            "\"status\":\"Backend running\"}";
+
+        sendResponse(socket, "200 OK", "application/json", statusJson);
         return;
     }
 
@@ -338,6 +397,26 @@ int main()
         cout << "Socket creation failed.\n";
         WSACleanup();
         return 1;
+    }
+
+    // ---------- Database Connection ----------
+    DbConfig config = getDbConfig();
+
+    Database database(config);
+    db = &database;
+
+    string dbError;
+
+    if (database.connect(dbError))
+    {
+        databaseConnected = true;
+        cout << "MySQL connected successfully.\n";
+    }
+    else
+    {
+        databaseConnected = false;
+        cout << "MySQL connection failed: " << dbError << "\n";
+        cout << "Server will start without database functionality.\n";
     }
 
     sockaddr_in address{};

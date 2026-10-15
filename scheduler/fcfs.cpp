@@ -1,4 +1,4 @@
-// fcfs.cpp - First Come First Serve (non-preemptive)
+// fcfs.cpp - First Come First Serve
 #include "scheduler.h"
 #include <algorithm>
 #include <numeric>

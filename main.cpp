@@ -7,7 +7,6 @@ using namespace std;
 
 int main()
 {
-    // Sample processes
     vector<Process> processes = {
         {"P1", 0, 5, 2},
         {"P2", 1, 3, 1},
@@ -17,9 +16,6 @@ int main()
 
     SchedulingResult result = runRoundRobin(processes, 2);
 
-    cout << "\n========== FCFS CPU SCHEDULING ==========\n\n";
-
-    // ---------------- Gantt Chart ----------------
     cout << "Gantt Chart:\n";
 
     for (const auto &segment : result.gantt)
@@ -38,7 +34,6 @@ int main()
 
     cout << "\n\n";
 
-    // ---------------- Process Metrics ----------------
     cout << "Process Metrics:\n\n";
 
     cout << "PID\tAT\tBT\tCT\tTAT\tWT\tRT\n";
